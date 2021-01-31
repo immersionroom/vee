@@ -86,6 +86,28 @@ def get_default_python():
     return _default_python
 
 
+def get_base_site_packages():
+    return os.path.join(
+        sys.base_prefix,
+        'lib',
+        'python{}.{}'.format(*sys.version_info[:2]),
+        'site-packages',
+    )
+
+
+def get_base_python():
+    
+    # Look for pyenv path.
+    m = re.match(r'versions/(\d\.\d+\.\d+)/?$', sys.base_prefix)
+    if m:
+        version = map(int, m.group(1).split('.'))
+        return Python(os.path.join(sys.base_prefix, 'bin', 'python'), version)
+    
+    # Fall back onto the default.
+    return get_default_python()
+
+
 if __name__ == '__main__':
     print(get_default_python())
+    print(get_base_python())
 

@@ -10,7 +10,7 @@ from vee import log
 from vee.cli import style, style_note
 from vee.pipeline.base import PipelineStep
 from vee.pipeline.http import download
-from vee.python import get_default_python
+from vee.python import get_default_python, get_base_site_packages
 from vee.semver import Version, VersionExpr
 from vee.utils import makedirs, http_request
 
@@ -24,11 +24,16 @@ def get_supported_tags():
         out = subprocess.check_output([
             get_default_python().executable,
             '-sc',
-            '''
-import json
+            '''import json
+import sys
+
+sys.path.append({!r})
+
 import packaging.tags
+
 print(json.dumps([(t.interpreter, t.abi, t.platform) for t in packaging.tags.sys_tags()]))
-''']).decode().strip()
+
+'''.format(get_base_site_packages())]).decode().strip()
         _supported_tags.extend(tuple(x) for x in json.loads(out))
 
     return _supported_tags

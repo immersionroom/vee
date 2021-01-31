@@ -8,7 +8,7 @@ from vee.cli import style, style_note, style_warning
 from vee.envvars import join_env_path
 from vee.package import Package
 from vee.pipeline.generic import GenericBuilder
-from vee.python import get_default_python
+from vee.python import get_default_python, get_base_site_packages
 from vee.subproc import call
 from vee.utils import find_in_tree
 
@@ -19,7 +19,15 @@ def call_setup_py(setup_py, args, **kwargs):
     kwargs.setdefault('vee_in_env', True)
 
     executable = get_default_python().executable
-    cmd = [executable, '-sc', '''import sys, setuptools; sys.argv[0]=__file__=%r; exec(compile(open(__file__).read(), __file__, 'exec'))''' % os.path.basename(setup_py)]
+    cmd = [executable, '-sc', '''import sys
+
+sys.path.append({!r})
+
+import setuptools
+
+sys.argv[0] = __file__ = {!r}
+exec(compile(open(__file__).read(), __file__, 'exec'))
+'''.format(get_base_site_packages(), os.path.basename(setup_py))]
     cmd.extend(('--command-packages', 'vee.distutils'))
     cmd.extend(args)
 

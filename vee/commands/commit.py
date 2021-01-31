@@ -57,10 +57,12 @@ def commit(args):
         for pkg_name, reqs in sorted(by_name.items()):
             new = reqs['work']
             old = reqs['head']
-            if new.revision == old.revision:
+            if new.version == old.version:
                 continue
             dev = dev_pkgs.get(pkg_name)
-            for line in dev.git('log', '--pretty=%cI %h %s', '{}...{}'.format(old.revision, new.revision), stdout=True).splitlines():
+            if not dev:
+                continue
+            for line in dev.git('log', '--pretty=%cI %h %s', '{}...{}'.format(old.version, new.version), stdout=True).splitlines():
                 line = line.strip()
                 if not line:
                     continue
